@@ -10,20 +10,23 @@ import UIKit
 
 final class HalfModalViewController: UIViewController {
     
-    lazy var backdropView: UIView = {
-        let bdView = UIView(frame: self.view.bounds)
-        bdView.backgroundColor = UIColor.black.withAlphaComponent(0.2)
-        return bdView
-    }()
+//    lazy var backdropView: UIView = {
+//        let bdView = UIView(frame: self.view.bounds)
+//        bdView.backgroundColor = UIColor.black.withAlphaComponent(0.2)
+//        return bdView
+//    }()
     
+    private let backdropView = UIView()
     let contentView = UIView()
-    let height = UIScreen.main.bounds.height / 1.5
+    var height: CGFloat = 0  //UIScreen.main.bounds.height / 1.5
     var isPresenting = false
     
-    init() {
+    init(height: CGFloat) {
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .custom
         transitioningDelegate = self
+        let maxHeight: CGFloat = UIScreen.main.bounds.height - 64
+        self.height = (maxHeight > height) ? height : maxHeight
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -32,14 +35,24 @@ final class HalfModalViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         view.backgroundColor = .clear
-        view.addSubview(backdropView)
-        view.addSubview(contentView)
         
-        contentView.backgroundColor = .red
+        backdropView.translatesAutoresizingMaskIntoConstraints = false
+        backdropView.backgroundColor = UIColor.black.withAlphaComponent(0.2)
+        view.addSubview(backdropView)
+        
+        backdropView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        backdropView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        backdropView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        backdropView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        
         contentView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.heightAnchor.constraint(equalToConstant: height).isActive = true
+        contentView.backgroundColor = .yellow
+        view.addSubview(contentView)
+
+        let contentHeight = contentView.heightAnchor.constraint(equalToConstant: height)
+        contentHeight.identifier = "height"
+        contentHeight.isActive = true
         contentView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
@@ -50,6 +63,19 @@ final class HalfModalViewController: UIViewController {
     
     @objc func handleTap(_ sender: UITapGestureRecognizer) {
         dismiss(animated: true, completion: nil)
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        contentView.constraints.forEach { constraint in
+            if constraint.identifier == "height" {
+                constraint.isActive = false
+                let newMaxHeight: CGFloat = size.height - 64
+                let newHeight = contentView.heightAnchor.constraint(equalToConstant: (newMaxHeight > self.height) ? self.height : newMaxHeight)
+                newHeight.identifier = "height"
+                newHeight.isActive = true            }
+        }
     }
 }
 
@@ -74,7 +100,6 @@ extension HalfModalViewController: UIViewControllerTransitioningDelegate, UIView
         
         if isPresenting == true {
             containerView.addSubview(toVC.view)
-            
             contentView.frame.origin.y += height
             backdropView.alpha = 0
             

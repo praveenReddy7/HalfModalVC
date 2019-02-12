@@ -13,14 +13,14 @@ class ViewController: UIViewController, UIViewControllerTransitioningDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-
         let add = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addTapped(_:)))
         self.navigationItem.rightBarButtonItem = add
     }
 
     
+    
     @objc func addTapped(_ sender: UIBarButtonItem) {
-        let vc = HalfModalViewController()
+        let vc = HalfModalViewController(height: 1000)
         present(vc, animated: true, completion: nil)
     }
     
