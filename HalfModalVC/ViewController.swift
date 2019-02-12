@@ -8,13 +8,22 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UIViewControllerTransitioningDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        view.backgroundColor = .white
+
+        let add = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addTapped(_:)))
+        self.navigationItem.rightBarButtonItem = add
     }
 
+    
+    @objc func addTapped(_ sender: UIBarButtonItem) {
+        let vc = HalfModalViewController()
+        present(vc, animated: true, completion: nil)
+    }
+    
+    
 
 }
-
